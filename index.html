@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>피어리스룰 BanPick</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="container">
+    <!-- 왼쪽: 히스토리 -->
+    <section class="card history-wrap">
+      <h2>BanPick History</h2>
+      <div id="history" class="history"></div>
+    </section>
+
+    <!-- 오른쪽: 컨트롤 + 보드 + 풀 -->
+    <div class="main-col">
+      <section class="card">
+        <h1>피어리스룰 BanPick </h1>
+
+        <div class="row">
+          <div class="controls-left">
+            <label class="mode"><input type="radio" name="mode" value="Bo1" /> BO1</label>
+            <label class="mode"><input type="radio" name="mode" value="Bo3" /> BO3</label>
+            <label class="mode"><input type="radio" name="mode" value="Bo5" checked /> BO5</label>
+
+            <label class="mode">
+              <input type="checkbox" id="chkTimer" checked />
+              타이머 사용
+            </label>
+          </div>
+
+          <div class="controls-right">
+            <button id="btnStart">시작하기</button>
+            <button id="btnBack" class="ghost">Back</button>
+            <button id="btnReset" class="ghost">Reset</button>
+          </div>
+        </div>
+
+        <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+      </section>
+
+      <!-- 밴픽 보드 -->
+      <section class="card">
+        <div class="grid">
+          <div class="team card" id="blue">
+            <div class="team-title blue">BLUE</div>
+
+            <div class="mini-label ban">BAN</div>
+            <div class="bans" id="blue-bans"></div>
+
+            <div class="mini-label pick">PICK</div>
+            <div class="picks" id="blue-picks"></div>
+          </div>
+
+          <div class="vs">
+            <div>VS</div>
+            <div class="series" id="seriesInfo">Game 1 / 1</div>
+
+            <button id="btnConfirm" class="vsbtn" title="Enter 키로도 선택 가능합니다.">챔피언 선택 (Enter)</button>
+            <button id="btnEndGame" class="vsbtn danger">1세트 밴픽 종료</button>
+          </div>
+
+          <div class="team card" id="red">
+            <div class="team-title red">RED</div>
+
+            <div class="mini-label ban">BAN</div>
+            <div class="bans" id="red-bans"></div>
+
+            <div class="mini-label pick">PICK</div>
+            <div class="picks" id="red-picks"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Champion Pool -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Champion Pool</h2>
+          <input id="searchInput" class="search" type="text" placeholder="챔피언 이름/영문 검색..." />
+        </div>
+        <div id="pool" class="pool"></div>
+        
+      </section>
+    </div>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
