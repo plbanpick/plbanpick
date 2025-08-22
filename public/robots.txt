@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://plbanpick.vercel.app/sitemap.xml
+Sitemap: https://plbanpick.com/sitemap.xml
