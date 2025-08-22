@@ -219,3 +219,31 @@ h2 { margin: 0 0 8px 0; font-size: 18px; }
 @media (min-width: 1200px) {
   .container { gap: clamp(16px, 1.2vw, 28px); }   /* 기본 16px → 24px. 필요하면 28px */
 }
+.notice-bar {
+  position: fixed;   /* 항상 상단 고정 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #222;  /* 어두운 배경 */
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  z-index: 1000; /* 다른 요소보다 위에 표시 */
+}
+
+.notice-bar a {
+  color: #4da6ff;  /* 파란색 링크 */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.notice-bar a:hover {
+  text-decoration: underline;
+}
+
+/* 본문이 안내바에 가려지지 않게 여백 추가 */
+body {
+  margin-top: 50px;
+}
+
