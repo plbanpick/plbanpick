@@ -1,6 +1,126 @@
 // ===== DOM helpers =====
 const $ = (sel) => document.querySelector(sel);
 const $all = (sel) => Array.from(document.querySelectorAll(sel));
+const translations = {
+  ko: {
+    start: "시작하기",
+    back: "Back",
+    reset: "Reset",
+    confirm: "챔피언 선택 (Enter)",
+    endgame: (n) => `${n}세트 밴픽 종료`,
+    history: "BanPick History",
+    pool: "Champion Pool",
+    search: "챔피언 이름/영문 검색...",
+    blue: "블루팀",
+    red: "레드팀",
+    timer: "타이머",
+    title: "피어리스룰 BanPick",
+    series_info: (n, total) => `${n}세트 / 총 ${total}세트`,
+
+    // 상태 메시지
+    status_select_mode: "모드를 선택하고 '시작하기'를 누르세요",
+    status_reset_done: "리셋 완료",
+    status_series_end: "시리즈가 모두 종료되었습니다.",
+    status_set_done: (n) =>
+      `세트 밴픽 완료. 결과를 확인하고 '${n}세트 밴픽 종료'를 눌러 진행하세요.`,
+    status_start_first: "시작하기를 먼저 누르세요.",
+    status_no_candidate: "후보가 없습니다. 챔피언을 먼저 클릭하세요.",
+    status_timeout: (type, side) =>
+      `${type} — ${side} 시간초과. 후보를 선택해 확정하세요.`,
+    status_round_remain: "아직 남은 라운드가 있습니다. 후보를 확정해 진행하세요.",
+    status_no_prev_set: "이전 세트가 없습니다.",
+    status_no_undo: "되돌릴 항목이 없습니다.",
+    status_staged: (type, side, name) =>
+      `${type} — ${side} 후보: ${name} → '챔피언 선택'으로 확정`,
+    status_undo_done: (type, side) =>
+      `${type} — ${side} 취소됨. 다시 선택하세요.`,
+    status_back_undo: (n) =>
+      `Game ${n}의 마지막 행동을 취소했습니다. 계속 수정하세요.`,
+
+    // 공지
+    notice: `오류 또는 수정사항 요청은 
+      <a href="mailto:contact@plbanpick.com">contact@plbanpick.com</a> 
+      으로 보내주세요.`
+  },
+
+  en: {
+    start: "Start",
+    back: "Back",
+    reset: "Reset",
+    confirm: "Confirm Champion (Enter)",
+    endgame: (n) => `End Game ${n} BanPick`,
+    history: "BanPick History",
+    pool: "Champion Pool",
+    search: "Search champion name...",
+    blue: "BLUE",
+    red: "RED",
+    timer: "Timer",
+    title: "Peerless Rule BanPick",
+    series_info: (n, total) => `Game ${n} / ${total}`,
+
+    // 상태 메시지
+    status_select_mode: "Select a mode and press 'Start'",
+    status_reset_done: "Reset complete",
+    status_series_end: "The series has ended.",
+    status_set_done: (n) =>
+      `Set complete. Check results and press 'End Game ${n} BanPick' to continue.`,
+    status_start_first: "Press 'Start' first.",
+    status_no_candidate: "No candidate. Please select a champion first.",
+    status_timeout: (type, side) =>
+      `${type} — ${side} timeout. Please select and confirm a champion.`,
+    status_round_remain: "There are remaining rounds. Please confirm to proceed.",
+    status_no_prev_set: "No previous set available.",
+    status_no_undo: "No actions to undo.",
+    status_staged: (type, side, name) =>
+      `${type} — ${side} candidate: ${name} → confirm with 'Confirm Champion'`,
+    status_undo_done: (type, side) =>
+      `${type} — ${side} undone. Please select again.`,
+    status_back_undo: (n) =>
+      `Last action in Game ${n} was undone. Continue editing.`,
+
+    // 공지
+    notice: `For errors or feedback, please contact 
+      <a href="mailto:contact@plbanpick.com">contact@plbanpick.com</a>.`
+  }
+};
+
+
+
+
+let currentLang = "ko";
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    const value = translations[lang][key];
+    if (!value) return;
+
+    if (typeof value === "function") {
+      el.innerHTML = value(gameIndex + 1, PRESETS[mode].games);
+    } else if (el.tagName === "INPUT" && el.placeholder) {
+      el.placeholder = value;
+    } else {
+      el.innerHTML = value;
+    }
+  });
+
+  // 상태창도 현재 언어로 갱신
+  if (!started) {
+    setStatus(translations[currentLang].status_select_mode);
+  }
+
+  // ✅ 강제 업데이트 추가
+  renderSeriesInfo();   // 시리즈 정보 새로 그리기
+  renderHistory();      // 히스토리도 새 언어 반영
+}
+
+
+
+
+
+// 기본 언어 설정
+document.addEventListener("DOMContentLoaded", () => setLang("ko"));
+
 
 // ======== Riot DDragon 설정 ========
 const CDN_BASE = "https://ddragon.leagueoflegends.com/cdn";
@@ -83,6 +203,29 @@ let actionLog = [];
 
 let staged = null;
 let q = "";
+const roleMap = {
+  TOP: ["Fighter", "Tank"],
+  JUNGLE: ["Assassin", "Fighter", "Tank"],
+  MID: ["Mage", "Assassin"],
+  ADC: ["Marksman"],
+  SUPPORT: ["Support", "Mage"],
+};
+
+let currentRole = "ALL";
+let championRoles = {};
+
+// championRoles.json 로드
+fetch("./championRoles.json")
+  .then(res => res.json())
+  .then(data => {
+    championRoles = data;
+    console.log("Champion roles loaded:", championRoles);
+    renderPool();   // 데이터가 준비된 후 챔피언 풀 다시 그림
+  })
+  .catch(err => console.error("championRoles.json 로드 실패:", err));
+
+
+
 
 // ===== 렌더링 =====
 function initSlots() {
@@ -100,16 +243,52 @@ function initSlots() {
 
 function renderSeriesInfo() {
   const total = PRESETS[mode].games;
-  el.seriesInfo.textContent = `Game ${gameIndex + 1} / ${total}`;
-  el.endGame.textContent = `${gameIndex + 1}세트 밴픽 종료`;
-  el.endGame.disabled = isLastGame();
+  const n = gameIndex + 1;
+
+  // 시리즈 정보 갱신
+  el.seriesInfo.textContent = translations[currentLang].series_info(n, total);
+
+  // ✅ End Game 버튼 텍스트도 여기서 갱신
+  el.endGame.textContent = translations[currentLang].endgame(n);
+
+  // 버튼 활성화/비활성화
+  el.endGame.disabled = false;
+  if (isLastGame()) {
+    el.endGame.disabled = true;
+  }
 }
 
+
+
+
 function filteredChamps() {
-  if (!q) return CHAMPS;
-  const s = q.toLowerCase();
-  return CHAMPS.filter(c => c.name.toLowerCase().includes(s) || c.id.toLowerCase().includes(s));
+  let list = CHAMPS;
+
+  // 검색 필터 (공백 무시)
+  if (q) {
+    const s = q.toLowerCase().replace(/\s+/g, "");
+    list = list.filter(c =>
+      c.name.toLowerCase().replace(/\s+/g, "").includes(s) ||
+      c.id.toLowerCase().replace(/\s+/g, "").includes(s)
+    );
+  }
+
+  // 역할 필터
+  if (currentRole !== "ALL") {
+    list = list.filter(c => {
+      const role = championRoles[c.id.toLowerCase()]; // JSON key는 소문자
+      if (!role) return false;
+      return role.toUpperCase() === currentRole; // 버튼 값은 대문자니까 맞춰줌
+    });
+  }
+
+  return list;
 }
+
+
+
+
+
 
 function renderPool() {
   if (CHAMPS.length === 0) {
@@ -129,18 +308,22 @@ function renderPool() {
     img.src = c.img;
     img.onerror = () => { img.style.display = "none"; };
 
-    const meta = document.createElement("div"); 
-    meta.className = "meta";
-    const name = document.createElement("div"); 
-    name.className = "name"; 
-    name.textContent = c.name;
-    meta.append(name);
-
-    btn.append(img, meta);
+    btn.append(img);
     frag.appendChild(btn);
   });
   el.pool.replaceChildren(frag);
 }
+
+// === 여기 아래에 넣기 ===
+document.querySelectorAll(".role-filters button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentRole = btn.dataset.role;
+    renderPool();
+  });
+});
+
+// 그다음에 이벤트 리스너들 (el.start.addEventListener...) 이어짐
+
 
 function setStatus(text) {
   el.status.classList.remove("hidden");
@@ -200,7 +383,7 @@ function historySetBlock(n, b, r, live) {
   wrap.className = "set";
   const title = document.createElement("div");
   title.className = "set-title";
-  title.textContent = live ? `Game ${n} (진행 중/검토 중)` : `Game ${n}`;
+  title.textContent = live ? `Game ${n} ` : `Game ${n}`;
   wrap.appendChild(title);
 
   const row = document.createElement("div");
@@ -278,7 +461,7 @@ function renderStaged() {
     target.classList.add("staged");
     slotSetImage(target, staged);
   }
-  setStatus(`${phase.type} — ${phase.side} 후보: ${staged.name} → '챔피언 선택'으로 확정`);
+  setStatus(translations[currentLang].status_staged(phase.type, phase.side, staged.name));
 }
 
 // ===== 진행/타이머 =====
@@ -342,7 +525,7 @@ function clearTimer() { if (ticking) clearInterval(ticking); ticking = null; }
 
 // ==== 후보 선택/확정 ====
 function stageChampion(champ) {
-  if (!started) { setStatus("시작하기를 먼저 누르세요."); return; }
+  if (!started) { setStatus(translations[currentLang].status_start_first); return; }
   if (!isActive()) return;
   if (taken.has(champ.id) || seriesTaken.has(champ.id)) return;
   staged = champ;
@@ -350,9 +533,12 @@ function stageChampion(champ) {
 }
 
 function commitStaged() {
-  if (!started) { setStatus("시작하기를 먼저 누르세요."); return; }
+  if (!started) { 
+    setStatus(translations[currentLang].status_start_first); 
+    return; 
+  }
   if (!isActive() || !staged || el.confirm.disabled) {
-    if (!staged) setStatus("후보가 없습니다. 챔피언을 먼저 클릭하세요.");
+    setStatus(translations[currentLang].status_no_candidate);
     return;
   }
 
@@ -378,6 +564,7 @@ function commitStaged() {
   advance();
 }
 
+
 function advance() {
   phaseIndex++;
   clearTimer();
@@ -387,7 +574,7 @@ function advance() {
       finalizeAndMaybeNext();
       return;
     } else {
-      setStatus(`세트 밴픽 완료. 결과를 확인하고 '${gameIndex + 1}세트 밴픽 종료'를 눌러 진행하세요.`);
+      setStatus(translations[currentLang].status_set_done(gameIndex + 1));
       el.confirm.disabled = true;
       el.endGame.disabled = false;
       renderPool();
@@ -403,7 +590,7 @@ function advance() {
 
 function endCurrentGame() {
   if (isActive()) { 
-    setStatus("아직 남은 라운드가 있습니다. 후보를 확정해 진행하세요."); 
+    setStatus(translations[currentLang].status_round_remain);
     return; 
   }
   finalizeAndMaybeNext();
@@ -429,7 +616,7 @@ function finalizeAndMaybeNext() {
     renderSeriesInfo();
     el.endGame.disabled = true;
     el.confirm.disabled = true;
-    setStatus("시리즈가 모두 종료되었습니다.");
+    setStatus(translations[currentLang].status_select_mode);
     setModeEnabled(true);
     clearTimer();
   }
@@ -475,7 +662,11 @@ function recomputeSeriesTakenFromResults() {
 }
 
 function backOneSetAndUndo() {
-  if (results.length === 0) { setStatus("이전 세트가 없습니다."); return false; }
+  if (results.length === 0) { 
+  setStatus(translations[currentLang].status_no_prev_set); 
+  return false; 
+}
+
   const lastGame = results.pop();
   gameIndex = results.length;
 
@@ -507,12 +698,13 @@ function backOneSetAndUndo() {
   renderPool(); renderSeriesInfo(); renderHistory(); renderStaged();
   startTimer();
 
-  setStatus(`Game ${gameIndex + 1}의 마지막 행동을 취소했습니다. 계속 수정하세요.`);
+  setStatus(translations[currentLang].status_staged(phase.type, phase.side, staged.name));
+
   return true;
 }
 
 function undoLastAction() {
-  if (!started && results.length === 0) { setStatus("시작하기를 먼저 누르세요."); return; }
+  if (!started && results.length === 0) { setStatus(translations[currentLang].status_round_remain); }
 
   if (!started && results.length > 0 && isCurrentGameEmpty()) {
     backOneSetAndUndo();
@@ -530,7 +722,10 @@ function undoLastAction() {
     return;
   }
 
-  if (!actionLog.length) { setStatus("되돌릴 항목이 없습니다."); return; }
+  if (!actionLog.length) { 
+  setStatus(translations[currentLang].status_no_undo); 
+  return; 
+}
 
   const last = actionLog.pop();
   if (phaseIndex > 0) phaseIndex--;
@@ -551,7 +746,7 @@ function undoLastAction() {
   renderPool(); renderHistory(); renderStaged();
   startTimer();
 
-  setStatus(`${last.kind} — ${last.side} 취소됨. 다시 선택하세요.`);
+  setStatus(translations[currentLang].status_staged(phase.type, phase.side, staged.name));
 }
 
 function backSeries() { undoLastAction(); }
@@ -574,20 +769,36 @@ function startSeries() {
 function startGame() {
   clearTimer();
   started = true;
-  phaseIndex = 0; blue = { bans:[], picks:[] }; red = { bans:[], picks:[] };
-  taken = new Set(); staged = null; actionLog = [];
-  initSlots(); updateBanSlots(); updatePickSlots();
-  renderPool(); renderSeriesInfo(); renderHistory();
-  el.start.disabled = true; el.endGame.disabled = (gameIndex + 1 === PRESETS[mode].games); el.confirm.disabled = false;
+  phaseIndex = 0;
+  blue = { bans: [], picks: [] };
+  red  = { bans: [], picks: [] };
+  taken = new Set();
+  staged = null;
+  actionLog = [];
+
+  initSlots();
+  updateBanSlots();
+  updatePickSlots();
+  renderPool();
+  renderSeriesInfo();  // ✅ 이 안에서 endGame 번역이 처리됨
+  renderHistory();
+
+  el.start.disabled = true;
+  el.endGame.disabled = (gameIndex + 1 === PRESETS[mode].games);
+  el.confirm.disabled = false;
+
   startTimer();
   el.endGame.disabled = isLastGame();
 }
+
+
+
 
 function resetSeries() {
   clearTimer();
   started = false;
   el.status.classList.remove("pulse","pulse-danger");
-  setStatus("리셋 완료");
+  setStatus(translations[currentLang].status_select_mode);
   actionLog = [];
   gameIndex = 0; seriesTaken = new Set(); results = [];
   phaseIndex = 0; blue = { bans:[], picks:[] }; red  = { bans:[], picks:[] };
@@ -616,7 +827,7 @@ el.chkTimer.addEventListener("change", e => {
   if (started) startTimer();
   else {
     el.status.classList.remove("pulse","pulse-danger");
-    setStatus("모드를 선택하고 '시작하기'를 누르세요");
+    setStatus(translations[currentLang].status_select_mode);
   }
 });
 
@@ -654,12 +865,13 @@ async function loadChampions() {
     const data = await cRes.json();
 
     CHAMPS = Object.values(data.data)
-      .map(d => ({
-        id: d.id,
-        name: d.name,
-        img: `${CDN_BASE}/${PATCH}/img/champion/${d.id}.png`,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+  .map(d => ({
+    id: d.id,
+    name: d.name,
+    img: `${CDN_BASE}/${PATCH}/img/champion/${d.id}.png`,
+    tags: d.tags // 역할 태그 저장
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name, "ko"));
   } catch (err) {
     console.warn("DDragon 로딩 실패. 폴백 텍스트 목록 사용", err);
     CHAMPS = [
@@ -671,20 +883,53 @@ async function loadChampions() {
     ];
   }
   renderPool();
-  setStatus("모드를 선택하고 '시작하기'를 누르세요");
-  el.start.disabled = false;
+  setStatus(translations[currentLang].status_select_mode);
+el.start.disabled = false;
 }
 
 function setModeEnabled(enabled) {
   $all('input[name="mode"]').forEach(r => r.disabled = !enabled);
 }
 
+// boot() 안
 function boot() {
   el.start.disabled = true;
   initSlots();
   renderSeriesInfo();
   renderHistory();
-  setStatus("챔피언 이미지 불러오는 중...");
+  setStatus(translations[currentLang].status_select_mode); // ✅ 수정
   loadChampions();
 }
+
+// resetSeries() 안
+function resetSeries() {
+  clearTimer();
+  started = false;
+  el.status.classList.remove("pulse","pulse-danger");
+  setStatus(translations[currentLang].status_select_mode); // ✅ 수정
+  actionLog = [];
+  gameIndex = 0; seriesTaken = new Set(); results = [];
+  phaseIndex = 0; blue = { bans:[], picks:[] }; red  = { bans:[], picks:[] };
+  taken = new Set(); staged = null;
+
+  initSlots(); updateBanSlots(); updatePickSlots();
+  renderPool(); renderSeriesInfo(); renderHistory();
+
+  el.start.disabled   = false;
+  el.endGame.disabled = true;
+  el.confirm.disabled = true;
+  setModeEnabled(true);
+}
+
 boot();
+
+const langBtn = document.getElementById("btnLang");
+
+langBtn.addEventListener("click", () => {
+  const next = (currentLang === "ko") ? "en" : "ko";
+  setLang(next);
+
+  // 버튼 텍스트도 같이 변경
+  langBtn.textContent = (next === "ko") ? "English" : "한국어";
+  langBtn.classList.toggle("active", next === "en");
+});
