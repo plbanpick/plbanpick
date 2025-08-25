@@ -2,28 +2,32 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>피어리스룰 BanPick</title>
+  <title data-i18n="title">피어리스룰 BanPick</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <body>
   <div class="notice-bar">
+  <span data-i18n="notice">
     오류 또는 수정사항 요청은 
     <a href="mailto:contact@plbanpick.com">contact@plbanpick.com</a> 
     으로 보내주세요.
-  </div>
+  </span>
+</div>
+
+
   <main class="container">
     <!-- 왼쪽: 히스토리 -->
     <section class="card history-wrap">
-      <h2>BanPick History</h2>
+      <h2 data-i18n="history">BanPick 히스토리</h2>
       <div id="history" class="history"></div>
     </section>
 
-    <!-- 오른쪽: 컨트롤 + 보드 + 풀 -->
+    <!-- 오른쪽: 컨트롤 + 보드 + 챔피언 풀 -->
     <div class="main-col">
+      <!-- 컨트롤 -->
       <section class="card">
-        <h1>피어리스룰 BanPick </h1>
+        <h1 data-i18n="title">피어리스룰 BanPick</h1>
 
         <div class="row">
           <div class="controls-left">
@@ -33,14 +37,15 @@
 
             <label class="mode">
               <input type="checkbox" id="chkTimer" checked />
-              타이머 사용
+              <span data-i18n="timer">타이머</span>
             </label>
           </div>
 
           <div class="controls-right">
-            <button id="btnStart">시작하기</button>
-            <button id="btnBack" class="ghost">Back</button>
-            <button id="btnReset" class="ghost">Reset</button>
+            <button id="btnStart" data-i18n="start">시작하기</button>
+            <button id="btnBack" class="ghost" data-i18n="back">Back</button>
+            <button id="btnReset" class="ghost" data-i18n="reset">Reset</button>
+            <button id="btnLang" class="lang-toggle">English</button>
           </div>
         </div>
 
@@ -51,7 +56,7 @@
       <section class="card">
         <div class="grid">
           <div class="team card" id="blue">
-            <div class="team-title blue">BLUE</div>
+            <div class="team-title blue" data-i18n="blue">블루팀</div>
 
             <div class="mini-label ban">BAN</div>
             <div class="bans" id="blue-bans"></div>
@@ -64,12 +69,12 @@
             <div>VS</div>
             <div class="series" id="seriesInfo">Game 1 / 1</div>
 
-            <button id="btnConfirm" class="vsbtn" title="Enter 키로도 선택 가능합니다.">챔피언 선택 (Enter)</button>
-            <button id="btnEndGame" class="vsbtn danger">1세트 밴픽 종료</button>
+            <button id="btnConfirm" class="vsbtn" data-i18n="confirm" title="Enter 키로도 선택 가능합니다.">챔피언 선택 (Enter)</button>
+            <button id="btnEndGame" class="vsbtn danger" data-i18n="endgame"></button>
           </div>
 
           <div class="team card" id="red">
-            <div class="team-title red">RED</div>
+            <div class="team-title red" data-i18n="red">레드팀</div>
 
             <div class="mini-label ban">BAN</div>
             <div class="bans" id="red-bans"></div>
@@ -80,14 +85,25 @@
         </div>
       </section>
 
-      <!-- Champion Pool -->
+      <!-- 챔피언 풀 -->
       <section class="card">
         <div class="card-header">
-          <h2>Champion Pool</h2>
-          <input id="searchInput" class="search" type="text" placeholder="챔피언 이름/영문 검색..." />
+          <div class="title-and-filters">
+            <h2 data-i18n="pool">챔피언 풀</h2>
+            <div class="role-filters">
+              <button data-role="ALL"><img src="./icon/1-all.png" alt="All"></button>
+              <button data-role="TOP" title="Top"><img src="./icon/2-top.png" alt="Top"></button>
+              <button data-role="JUNGLE"><img src="./icon/3-jgl.png" alt="Jungle"></button>
+              <button data-role="MID"><img src="./icon/4-mid.png" alt="Mid"></button>
+              <button data-role="ADC"><img src="./icon/5-bot.png" alt="ADC"></button>
+              <button data-role="SUPPORT"><img src="./icon/6-spt.png" alt="Support"></button>
+            </div>
+          </div>
+          <input id="searchInput" class="search" type="text" data-i18n="search" placeholder="챔피언 이름/영문 검색..." />
         </div>
+
+        <!-- 챔피언 풀 -->
         <div id="pool" class="pool"></div>
-        
       </section>
     </div>
   </main>
