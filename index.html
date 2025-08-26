@@ -1,87 +1,87 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title data-i18n="title">피어리스룰 BanPick</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="./style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO 기본 -->
+  <title>피어리스룰 BanPick — LoL 밴픽 시뮬레이터</title>
+  <meta name="description" content="LoL 밴픽을 실전처럼 연습하세요. BO1/BO3/BO5 지원, 블루/레드 밴·픽 기록, 히스토리 저장, 타이머, 챔피언 검색(한글/영문)까지 — 누구나 무료로 사용 가능합니다.">
+  <link rel="canonical" href="https://plbanpick.com/">
+  <meta name="robots" content="index,follow">
+
+  <!-- 다국어 페이지가 있을 경우 -->
+  <link rel="alternate" href="https://plbanpick.com/" hreflang="ko" />
+  <link rel="alternate" href="https://plbanpick.com/en" hreflang="en" />
+  <link rel="alternate" href="https://plbanpick.com/" hreflang="x-default" />
+
+  <!-- Open Graph / SNS 공유용 -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://plbanpick.com/">
+  <meta property="og:title" content="피어리스룰 BanPick — LoL 밴픽 시뮬레이터">
+  <meta property="og:description" content="BO1/BO3/BO5 지원, 밴·픽 히스토리, 타이머, 한/영 검색 — 무료 사용.">
+  <meta property="og:image" content="https://plbanpick.com/og-cover.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- 구조화 데이터(JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "피어리스룰 BanPick",
+    "url": "https://plbanpick.com/",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Web",
+    "inLanguage": ["ko","en"],
+    "description": "LoL 밴픽을 실전처럼 연습할 수 있는 웹 시뮬레이터. BO1/BO3/BO5, 히스토리, 타이머, 한/영 검색 지원.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "plbanpick",
+      "email": "contact@plbanpick.com"
+    }
+  }
+  </script>
+
+  <!-- CSS 불러오기 -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="notice-bar">
-  <span data-i18n="notice">
-    오류 또는 수정사항 요청은 
-    <a href="mailto:contact@plbanpick.com">contact@plbanpick.com</a> 
-    으로 보내주세요.
-  </span>
-</div>
+  <!-- 사이트 메인 소개 (구글 스니펫용으로도 활용될 수 있음) -->
+  <header>
+    <h1>피어리스룰 BanPick</h1>
+    <p>LoL 밴픽을 실전처럼 연습하세요. BO1/BO3/BO5 지원, 히스토리 기록, 타이머, 챔피언 검색(한글/영문) — 무료로 이용할 수 있는 밴픽 시뮬레이터입니다.</p>
+  </header>
 
+  <main>
+    <div class="banpick-container">
+      <section class="banpick-area">
+        <div class="team card" id="blue">
+          <div class="team-title blue" data-i18n="blue">블루팀</div>
 
-  <main class="container">
-    <!-- 왼쪽: 히스토리 -->
-    <section class="card history-wrap">
-      <h2 data-i18n="history">BanPick 히스토리</h2>
-      <div id="history" class="history"></div>
-    </section>
+          <div class="mini-label ban">BAN</div>
+          <div class="bans" id="blue-bans"></div>
 
-    <!-- 오른쪽: 컨트롤 + 보드 + 챔피언 풀 -->
-    <div class="main-col">
-      <!-- 컨트롤 -->
-      <section class="card">
-        <h1 data-i18n="title">피어리스룰 BanPick</h1>
-
-        <div class="row">
-          <div class="controls-left">
-            <label class="mode"><input type="radio" name="mode" value="Bo1" /> BO1</label>
-            <label class="mode"><input type="radio" name="mode" value="Bo3" /> BO3</label>
-            <label class="mode"><input type="radio" name="mode" value="Bo5" checked /> BO5</label>
-
-            <label class="mode">
-              <input type="checkbox" id="chkTimer" checked />
-              <span data-i18n="timer">타이머</span>
-            </label>
-          </div>
-
-          <div class="controls-right">
-            <button id="btnStart" data-i18n="start">시작하기</button>
-            <button id="btnBack" class="ghost" data-i18n="back">Back</button>
-            <button id="btnReset" class="ghost" data-i18n="reset">Reset</button>
-            <button id="btnLang" class="lang-toggle">English</button>
-          </div>
+          <div class="mini-label pick">PICK</div>
+          <div class="picks" id="blue-picks"></div>
         </div>
 
-        <div id="status" class="status hidden" role="status" aria-live="polite"></div>
-      </section>
+        <div class="vs">
+          <div>VS</div>
+          <div class="series" id="seriesInfo">Game 1 / 1</div>
 
-      <!-- 밴픽 보드 -->
-      <section class="card">
-        <div class="grid">
-          <div class="team card" id="blue">
-            <div class="team-title blue" data-i18n="blue">블루팀</div>
+          <button id="btnConfirm" class="vsbtn" data-i18n="confirm" title="Enter 키로도 선택 가능합니다.">챔피언 선택 (Enter)</button>
+          <button id="btnEndGame" class="vsbtn danger" data-i18n="endgame"></button>
+        </div>
 
-            <div class="mini-label ban">BAN</div>
-            <div class="bans" id="blue-bans"></div>
+        <div class="team card" id="red">
+          <div class="team-title red" data-i18n="red">레드팀</div>
 
-            <div class="mini-label pick">PICK</div>
-            <div class="picks" id="blue-picks"></div>
-          </div>
+          <div class="mini-label ban">BAN</div>
+          <div class="bans" id="red-bans"></div>
 
-          <div class="vs">
-            <div>VS</div>
-            <div class="series" id="seriesInfo">Game 1 / 1</div>
-
-            <button id="btnConfirm" class="vsbtn" data-i18n="confirm" title="Enter 키로도 선택 가능합니다.">챔피언 선택 (Enter)</button>
-            <button id="btnEndGame" class="vsbtn danger" data-i18n="endgame"></button>
-          </div>
-
-          <div class="team card" id="red">
-            <div class="team-title red" data-i18n="red">레드팀</div>
-
-            <div class="mini-label ban">BAN</div>
-            <div class="bans" id="red-bans"></div>
-
-            <div class="mini-label pick">PICK</div>
-            <div class="picks" id="red-picks"></div>
-          </div>
+          <div class="mini-label pick">PICK</div>
+          <div class="picks" id="red-picks"></div>
         </div>
       </section>
 
@@ -108,6 +108,11 @@
     </div>
   </main>
 
+  <footer>
+    <p>오류나 건의사항은 <a href="mailto:contact@plbanpick.com">contact@plbanpick.com</a> 으로 보내주세요.</p>
+  </footer>
+
+  <!-- JS 불러오기 -->
   <script src="./app.js"></script>
 </body>
 </html>
