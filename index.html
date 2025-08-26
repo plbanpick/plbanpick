@@ -5,16 +5,32 @@
   <title data-i18n="title">피어리스룰 BanPick</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
+
+  <!-- ✅ GTM head 코드 (Google Tag Manager) -->
+  <script>
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MVJMC5M');
+  </script>
+  <!-- ✅ End GTM head 코드 -->
 </head>
 <body>
-  <div class="notice-bar">
-  <span data-i18n="notice">
-    오류 또는 수정사항 요청은 
-    <a href="mailto:contact@plbanpick.com">contact@plbanpick.com</a> 
-    으로 보내주세요.
-  </span>
-</div>
+  <!-- ✅ GTM body 코드 (noscript, body 열자마자) -->
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MVJMC5M"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
+  <!-- ✅ End GTM body 코드 -->
 
+  <div class="notice-bar">
+    <span data-i18n="notice">
+      오류 또는 수정사항 요청은 
+      <a href="mailto:contact@plbanpick.com">contact@plbanpick.com</a> 
+      으로 보내주세요.
+    </span>
+  </div>
 
   <main class="container">
     <!-- 왼쪽: 히스토리 -->
@@ -108,6 +124,8 @@
     </div>
   </main>
 
+  <!-- ✅ JS는 반드시 맨 마지막에 유지 -->
   <script src="./app.js"></script>
 </body>
 </html>
+
